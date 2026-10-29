@@ -1,0 +1,61 @@
+name: TaskFlow - Integração Contínua
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build e Testes Automatizados
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obter código do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, sqlite3, pdo_sqlite, xml, dom, bcmath
+          coverage: none
+
+      - name: Instalar dependências PHP
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Instalar dependências JavaScript
+        run: npm ci
+
+      - name: Executar build do frontend
+        run: npm run build
+
+      - name: Preparar ambiente Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Configurar banco SQLite e executar migrações
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan migrate --force
+
+      - name: Executar testes automatizados
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+        run: php artisan test
