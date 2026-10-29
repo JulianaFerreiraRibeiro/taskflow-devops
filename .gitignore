@@ -24,3 +24,10 @@ Homestead.yaml
 Thumbs.db
 /database/*.sqlite
 /database/*.sqlite-*
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+*.tfplan
+crash.log
