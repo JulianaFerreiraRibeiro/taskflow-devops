@@ -1,0 +1,27 @@
+name: taskflow-cd
+
+services:
+  app:
+    image: ghcr.io/julianaferreiraribeiro/taskflow-devops:${IMAGE_TAG:-sha-6ddae4d}
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:8081:8000"
+
+    environment:
+      APP_NAME: TaskFlow
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8081
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/taskflow.sqlite
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      LOG_CHANNEL: stderr
+
+    volumes:
+      - taskflow_cd_data:/data
+
+volumes:
+  taskflow_cd_data:
